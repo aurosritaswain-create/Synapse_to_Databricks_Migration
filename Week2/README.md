@@ -22,6 +22,7 @@ Target Format: The final, curated dataframe was written back to the storage laye
 Design Rationale: Delta Lake was chosen over traditional formats like CSV or Parquet because it brings ACID transaction reliability to data lakes. It allows for scalable metadata handling, time-travel (data versioning), and highly optimized columnar storage, which is the industry standard for modern data warehousing.
 
 2. Implementation 1: Azure Synapse Analytics
+   
 Approach: Visual, Low-Code Orchestration via Mapping Data Flows.
 
 Design Decisions:
@@ -32,6 +33,7 @@ Visual Lineage: Synapse allows engineers and non-technical stakeholders to easil
 Built-in Optimizations: Under the hood, Synapse translates the visual boxes into optimized Spark jobs, allowing the developer to focus purely on business logic rather than cluster management.
 
 3. Implementation 2: Azure Databricks
+   
 Approach: Code-First, Programmatic Engineering via PySpark.
 
 Design Decisions:
