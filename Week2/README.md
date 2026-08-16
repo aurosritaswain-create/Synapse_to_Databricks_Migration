@@ -44,6 +44,7 @@ Granular Control: By writing code such as df.dropna(subset=["transaction_id"]) a
 Unity Catalog Integration: The raw data was securely accessed using Unity Catalog Volumes, demonstrating modern data governance and secure file path referencing.
 
 4. Comprehensive Platform Comparison
+   
 Having built the exact same architecture in both platforms, the following distinctions were observed:
 
 Development Experience & Learning Curve: Azure Synapse provides a significantly gentler learning curve. It is highly accessible for data professionals who have a strong background in SQL or traditional ETL tools but may lack deep Python programming skills. Databricks requires a strong foundational knowledge of PySpark, Python, or Scala.
