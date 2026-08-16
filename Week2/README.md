@@ -5,15 +5,18 @@ This dual-implementation strategy allowed for a direct comparison of a visual, l
     
 Regardless of the platform utilized, the core data processing logic remained identical to ensure a fair comparison and consistent data outputs. The pipeline execution was divided into the following strict phases:
 
-A. Extraction (Ingestion):
+A. Extraction (Ingestion)
+
 Data Source: The pipeline initiated by connecting to the raw data storage layer to ingest a multi-line JSON file containing raw home improvement sales transactions.
 
 B. Transformation (Data Cleaning & Validation)
+
 Raw data requires rigorous validation before it can be utilized by downstream business intelligence teams. Two specific data quality rules were applied:
 Rule 1 - Primary Key Validation: The pipeline scanned for and dropped any records containing a null or missing value in the transaction_id column.
 Rule 2 - Financial Integrity Validation: The pipeline filtered the dataset to only include rows where the total_after_discount (or sales amount) was greater than or equal to zero.
 
-C. Loading (Storage and Formatting):
+C. Loading (Storage and Formatting)
+
 Target Format: The final, curated dataframe was written back to the storage layer exclusively in Delta format.
 
 Design Rationale: Delta Lake was chosen over traditional formats like CSV or Parquet because it brings ACID transaction reliability to data lakes. It allows for scalable metadata handling, time-travel (data versioning), and highly optimized columnar storage, which is the industry standard for modern data warehousing.
