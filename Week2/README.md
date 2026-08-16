@@ -1,7 +1,8 @@
 The objective of the Week 2 Foundation task was to design and implement a robust, end-to-end Extract, Transform, and Load (ETL) pipeline utilizing the Big Box Home Improvement dataset. To thoroughly evaluate modern data engineering architectures, this pipeline was constructed twice using two distinct Microsoft Azure ecosystem platforms: Azure Synapse Analytics and Azure Databricks.
 This dual-implementation strategy allowed for a direct comparison of a visual, low-code orchestration tool versus a code-first, distributed computing environment. The ultimate goal of both pipelines was to ingest raw transactional data, enforce strict data quality rules, and output a highly optimized, analytics-ready dataset.
 
-1. Data Pipeline Architecture (ETL Logic):
+1. Data Pipeline Architecture (ETL Logic)
+2. 
 Regardless of the platform utilized, the core data processing logic remained identical to ensure a fair comparison and consistent data outputs. The pipeline execution was divided into the following strict phases:
 
 A. Extraction (Ingestion):
