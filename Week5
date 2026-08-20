@@ -1,19 +1,28 @@
-Slide 1: Core Concepts Explained
- AI Agents: Unlike standard chatbots that just answer questions, an AI Agent is an autonomous system that can be given a goal (e.g., "Translate this code") and independently use tools to execute it.
- Agentic Workflows: This is an iterative, multi-step process where an AI Agent writes code, runs a test, identifies its own errors, fixes them, and then presents the final working result.
- MCP (Model Context Protocol): Think of this as a secure bridge. It allows AI models to securely connect directly to our local enterprise tools, codebases, and Databricks environments without exposing sensitive data.
- Claude Code / CLI Tools: AI assistants that sit directly inside the developer’s command-line terminal, allowing engineers to ask the AI to refactor code or write unit tests directly within their workspace.
-Slide 2: The Human vs. AI Balance
- Where AI Accelerates Work:
- Translating raw Synapse JSON into boilerplate PySpark code.
- Writing automated unit tests for data validation.
- Generating documentation for the new Databricks pipelines.
- Where Human Oversight is Mandatory:
- Business Logic Validation: Ensuring the AI didn't accidentally change a financial calculation (like our negative sales filter).
- Security & Governance: Humans must control access rights, Unity Catalog permissions, and final code approvals before anything goes into production.
-Slide 3: Applying AI to Our Migration Problem
-The Strategy: To accelerate the 3-to-5-month timeline proposed in Week 3, we will implement an Agentic Workflow to automate the creation of our Pattern-Based Templates.
-1. Analyze: We use an AI Agent to scan the 100 raw Synapse JSON files.
-2. Categorize: The Agent groups the pipelines into matching patterns based on their transformations.
-3. Generate: Using prompt engineering, we instruct the Agent to generate the parameterized PySpark code for each pattern.
-4. Human Review: The Data Engineering team reviews the generated Databricks templates, runs side-by-side data tests, and deploys.
+# 1. THE METADATA (This represents the 100 pipelines)
+# Instead of 100 scripts, we just have a list of configurations.
+pipeline_configs = [
+    {
+        "pipeline_name": "Sales_Data",
+        "source_file": "sales.json",
+        "drop_null_column": "transaction_id",
+        "filter_rule": "amount > 0"
+    },
+    {
+        "pipeline_name": "Customer_Data",
+        "source_file": "customers.json",
+        "drop_null_column": "customer_id",
+        "filter_rule": "age >= 18"
+    }
+]
+
+# 2. THE TEMPLATE ENGINE (The one script that runs them all)
+print("--- STARTING MIGRATION FACTORY ---\n")
+
+for config in pipeline_configs:
+    print(f"Running Pipeline: {config['pipeline_name']}")
+    print(f" -> Reading from: {config['source_file']}")
+    print(f" -> Cleaning rule: Dropping nulls in '{config['drop_null_column']}'")
+    print(f" -> Transformation rule: Applying filter '{config['filter_rule']}'")
+    print(f" -> Saving to Delta format...\n")
+    
+print("--- ALL PIPELINES PROCESSED SUCCESSFULLY ---")
