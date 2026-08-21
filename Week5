@@ -1,28 +1,37 @@
-# 1. THE METADATA (This represents the 100 pipelines)
-# Instead of 100 scripts, we just have a list of configurations.
-pipeline_configs = [
-    {
-        "pipeline_name": "Sales_Data",
-        "source_file": "sales.json",
-        "drop_null_column": "transaction_id",
-        "filter_rule": "amount > 0"
-    },
-    {
-        "pipeline_name": "Customer_Data",
-        "source_file": "customers.json",
-        "drop_null_column": "customer_id",
-        "filter_rule": "age >= 18"
-    }
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# 1. CREATE FAKE DATA (So we don't have to worry about file paths breaking live)
+data = [
+    ("T001", "Drill", 50.0),
+    ("T002", "Hammer", -10.0), # Invalid negative sale
+    (None, "Wrench", 20.0),    # Invalid null ID
+    ("T004", "Saw", 100.0)
 ]
+columns = ["transaction_id", "product", "sales_amount"]
+raw_df = spark.createDataFrame(data, columns)
 
-# 2. THE TEMPLATE ENGINE (The one script that runs them all)
-print("--- STARTING MIGRATION FACTORY ---\n")
+print("--- RAW DATA FROM SYNAPSE ---")
+raw_df.show()
 
-for config in pipeline_configs:
-    print(f"Running Pipeline: {config['pipeline_name']}")
-    print(f" -> Reading from: {config['source_file']}")
-    print(f" -> Cleaning rule: Dropping nulls in '{config['drop_null_column']}'")
-    print(f" -> Transformation rule: Applying filter '{config['filter_rule']}'")
-    print(f" -> Saving to Delta format...\n")
+# 2. THE METADATA CONFIGURATION
+pipeline_config = {
+    "primary_key": "transaction_id",
+    "filter_rule": col("sales_amount") >= 0
+}
+
+# 3. THE REUSABLE TEMPLATE ENGINE
+def run_migration_template(df, config):
+    # Step A: Drop Nulls
+    clean_df = df.dropna(subset=[config["primary_key"]])
     
-print("--- ALL PIPELINES PROCESSED SUCCESSFULLY ---")
+    # Step B: Apply Business Filter
+    final_df = clean_df.filter(config["filter_rule"])
+    
+    return final_df
+
+# 4. EXECUTE AND SHOW THE PROOF
+curated_df = run_migration_template(raw_df, pipeline_config)
+
+print("--- FINAL CURATED DATA (PROCESSED BY TEMPLATE) ---")
+curated_df.show()
