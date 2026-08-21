@@ -1,37 +1,15 @@
-from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+System Role: You are an expert Azure Data Architect AI Agent. 
 
-# 1. CREATE FAKE DATA (So we don't have to worry about file paths breaking live)
-data = [
-    ("T001", "Drill", 50.0),
-    ("T002", "Hammer", -10.0), # Invalid negative sale
-    (None, "Wrench", 20.0),    # Invalid null ID
-    ("T004", "Saw", 100.0)
-]
-columns = ["transaction_id", "product", "sales_amount"]
-raw_df = spark.createDataFrame(data, columns)
+Context: We are migrating 100 pipelines from Azure Synapse Mapping Data Flows to Azure Databricks PySpark. 
 
-print("--- RAW DATA FROM SYNAPSE ---")
-raw_df.show()
+Task: Analyze the following Synapse Data Flow JSON code. Extract the business logic (source format, filter rules, and sink format). 
 
-# 2. THE METADATA CONFIGURATION
-pipeline_config = {
-    "primary_key": "transaction_id",
-    "filter_rule": col("sales_amount") >= 0
-}
+Execution: Write a dynamic Databricks PySpark script that replicates this exact logic. 
 
-# 3. THE REUSABLE TEMPLATE ENGINE
-def run_migration_template(df, config):
-    # Step A: Drop Nulls
-    clean_df = df.dropna(subset=[config["primary_key"]])
-    
-    # Step B: Apply Business Filter
-    final_df = clean_df.filter(config["filter_rule"])
-    
-    return final_df
+Constraints: 
+* Use Python (PySpark).
+* Do not hardcode the file paths; use variables so this can be a reusable template.
+* Include comments explaining the data quality rules.
 
-# 4. EXECUTE AND SHOW THE PROOF
-curated_df = run_migration_template(raw_df, pipeline_config)
-
-print("--- FINAL CURATED DATA (PROCESSED BY TEMPLATE) ---")
-curated_df.show()
+Synapse JSON Code:
+[PASTE YOUR SYNAPSE JSON CODE HERE]
