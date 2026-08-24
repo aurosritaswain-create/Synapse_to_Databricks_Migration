@@ -1,0 +1,66 @@
+{
+	"name": "RawJson1",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "aurosynworkspace-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Json",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "big_box_home_improvement_dataset.json",
+				"fileSystem": "raw-data"
+			}
+		},
+		"schema": {
+			"type": "object",
+			"properties": {
+				"transaction_id": {
+					"type": "string"
+				},
+				"retailer": {
+					"type": "string"
+				},
+				"store_location": {
+					"type": "string"
+				},
+				"department": {
+					"type": "string"
+				},
+				"project_type": {
+					"type": "string"
+				},
+				"sku": {
+					"type": "string"
+				},
+				"brand": {
+					"type": "string"
+				},
+				"unit_price": {
+					"type": "number"
+				},
+				"quantity": {
+					"type": "integer"
+				},
+				"bulk_discount_applied_%": {
+					"type": "integer"
+				},
+				"subtotal_before_discount": {
+					"type": "number"
+				},
+				"total_after_discount": {
+					"type": "number"
+				},
+				"pro_program": {
+					"type": "string"
+				},
+				"purchase_date": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

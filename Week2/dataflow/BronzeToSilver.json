@@ -1,0 +1,140 @@
+{
+	"name": "BronzeToSilver",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "RawJson1",
+						"type": "DatasetReference"
+					},
+					"name": "RawJSONData"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureDataLakeStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "RawcsvData"
+				}
+			],
+			"sinks": [
+				{
+					"linkedService": {
+						"referenceName": "aurosynworkspace-WorkspaceDefaultStorage",
+						"type": "LinkedServiceReference"
+					},
+					"name": "WriteToDelta"
+				},
+				{
+					"linkedService": {
+						"referenceName": "AzureDataLakeStorage1",
+						"type": "LinkedServiceReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "FilterInvalidData"
+				},
+				{
+					"name": "derivedColumn1"
+				},
+				{
+					"name": "filter1"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          transaction_id as string,",
+				"          retailer as string,",
+				"          store_location as string,",
+				"          department as string,",
+				"          project_type as string,",
+				"          sku as string,",
+				"          brand as string,",
+				"          unit_price as double,",
+				"          quantity as integer,",
+				"          {bulk_discount_applied_%} as integer,",
+				"          subtotal_before_discount as double,",
+				"          total_after_discount as double,",
+				"          pro_program as string,",
+				"          purchase_date as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     documentForm: 'arrayOfDocuments') ~> RawJSONData",
+				"source(output(",
+				"          transaction_id as string,",
+				"          retailer as string,",
+				"          store_location as string,",
+				"          department as string,",
+				"          project_type as string,",
+				"          sku as string,",
+				"          brand as string,",
+				"          unit_price as double,",
+				"          quantity as short,",
+				"          {bulk_discount_applied_%} as short,",
+				"          subtotal_before_discount as double,",
+				"          total_after_discount as double,",
+				"          pro_program as string,",
+				"          purchase_date as timestamp",
+				"     ),",
+				"     useSchema: false,",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'delimited',",
+				"     fileSystem: 'raw-data',",
+				"     fileName: 'big_box_home_improvement_dataset.csv',",
+				"     columnDelimiter: ',',",
+				"     escapeChar: '\\\\',",
+				"     quoteChar: '\\\"',",
+				"     columnNamesAsHeader: true) ~> RawcsvData",
+				"RawJSONData filter(!isNull(transaction_id) && total_after_discount > 0) ~> FilterInvalidData",
+				"RawcsvData derive(department = upper(department)) ~> derivedColumn1",
+				"derivedColumn1 filter(!isNull(transaction_id)) ~> filter1",
+				"FilterInvalidData sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'curated-data',",
+				"     folderPath: 'silver_transactions',",
+				"     overwrite: true,",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> WriteToDelta",
+				"filter1 sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     format: 'delta',",
+				"     fileSystem: 'curated-data',",
+				"     folderPath: 'silver_csv_data',",
+				"     mergeSchema: false,",
+				"     autoCompact: false,",
+				"     optimizedWrite: false,",
+				"     vacuum: 0,",
+				"     deletable: false,",
+				"     insertable: true,",
+				"     updateable: false,",
+				"     upsertable: false,",
+				"     umask: 0022,",
+				"     preCommands: [],",
+				"     postCommands: [],",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> sink1"
+			]
+		}
+	}
+}
