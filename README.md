@@ -1,18 +1,19 @@
-from pyspark.sql.functions import col, upper
+ffrom pyspark.sql.functions import sum
 
-# 1. Read from the Bronze tables we just created
-df_json_bronze = spark.read.table("bronze_json_data")
-df_csv_bronze = spark.read.table("bronze_csv_data")
+# 1. Read from the clean Silver tables
+df_json_silver = spark.read.table("silver_json_data")
+df_csv_silver = spark.read.table("silver_csv_data")
 
-# 2. Clean JSON: Filter out null transactions
-df_json_silver = df_json_bronze.filter(col("transaction_id").isNotNull())
+# 2. Summarize JSON: Group by date
+df_json_gold = df_json_silver.groupBy("purchase_date") \
+    .agg(sum("total_after_discount").alias("total_daily_revenue"))
 
-# 3. Clean CSV: Create uppercase column and filter nulls
-df_csv_silver = df_csv_bronze.withColumn("department_upper", upper(col("department"))) \
-                             .filter(col("transaction_id").isNotNull())
+# 3. Summarize CSV: Group by department
+df_csv_gold = df_csv_silver.groupBy("department") \
+    .agg(sum("total_after_discount").alias("total_csv_revenue"))
 
-# 4. Save as Silver Delta Tables
-df_json_silver.write.format("delta").mode("overwrite").saveAsTable("silver_json_data")
-df_csv_silver.write.format("delta").mode("overwrite").saveAsTable("silver_csv_data")
+# 4. Save as Gold Delta Tables
+df_json_gold.write.format("delta").mode("overwrite").saveAsTable("gold_json_summary")
+df_csv_gold.write.format("delta").mode("overwrite").saveAsTable("gold_csv_summary")
 
-print("Silver transformations complete!")
+print("Gold aggregations complete! Pipeline finished.")
