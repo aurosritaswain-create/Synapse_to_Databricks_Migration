@@ -1,53 +1,49 @@
 import json
-from pyspark.sql import SparkSession
+from pyspark.sql.functions import expr
 
-# 1. THE SYNAPSE OBJECT (Simulating your BronzeToSilver.json file)
-# Instead of you typing the rules, we load the raw JSON that Synapse generated.
-synapse_dataflow_json = """
+# 1. THE SYNAPSE OBJECT (Simulating your SilverToGold.json file)
+synapse_gold_json = """
 {
-    "name": "BronzeToSilver",
+    "name": "SilverToGold",
     "properties": {
         "type": "MappingDataFlow",
-        "sources": [{"name": "raw_sales"}],
+        "sources": [{"name": "silver_sales"}],
         "transformations": [
             {
-                "name": "FilterNegativeSales",
-                "filter_expression": "sales_amount >= 0"
+                "name": "AggregateRevenue",
+                "group_by_column": "department",
+                "aggregate_expression": "sum(sales_amount) as total_revenue"
             }
         ]
     }
 }
 """
 
-# 2. THE PARSER (The tool that reads the Synapse file)
-print("--- 1. READING SYNAPSE OBJECT ---")
-# In a real scenario, this would be: json.load(open("/path/to/BronzeToSilver.json"))
-synapse_obj = json.loads(synapse_dataflow_json)
+# 2. THE PARSER 
+print("--- 1. READING SYNAPSE GOLD OBJECT ---")
+gold_obj = json.loads(synapse_gold_json)
 
-pipeline_name = synapse_obj["name"]
-source_name = synapse_obj["properties"]["sources"][0]["name"]
-# We extract the rule DIRECTLY from the JSON text!
-extracted_rule = synapse_obj["properties"]["transformations"][0]["filter_expression"]
+gold_pipeline_name = gold_obj["name"]
+group_col = gold_obj["properties"]["transformations"][0]["group_by_column"]
+agg_expr = gold_obj["properties"]["transformations"][0]["aggregate_expression"]
 
-print(f"Successfully read Synapse Pipeline: {pipeline_name}")
-print(f"Found Source: {source_name}")
-print(f"Found Transformation Rule: '{extracted_rule}'\n")
+print(f"Successfully read Pipeline: {gold_pipeline_name}")
+print(f"Found Group By Rule: '{group_col}'")
+print(f"Found Aggregation Rule: '{agg_expr}'\n")
 
+# 3. THE EXECUTION 
+print("--- 2. EXECUTING MIGRATED GOLD LOGIC ---")
 
-# 3. THE EXECUTION (Applying the extracted rule to PySpark)
-print("--- 2. EXECUTING MIGRATED LOGIC ---")
+# Fake Silver Data
+silver_data = [("Hardware", 50.0), ("Hardware", 100.0), ("Garden", 20.0)]
+silver_df = spark.createDataFrame(silver_data, ["department", "sales_amount"])
 
-# Create quick fake data to prove the filter works
-data = [("T001", "Drill", 50.0), ("T002", "Hammer", -10.0)]
-raw_df = spark.createDataFrame(data, ["transaction_id", "product", "sales_amount"])
+print("Clean Silver Data:")
+silver_df.show()
 
-print("Raw Data:")
-raw_df.show()
+# Automatically apply the extracted grouping and aggregation rules!
+print("Applying extracted Synapse aggregation automatically...")
+gold_df = silver_df.groupBy(group_col).agg(expr(agg_expr))
 
-# We pass the STRING we extracted from the JSON directly into PySpark's where() clause
-print(f"Applying extracted Synapse rule automatically...")
-clean_df = raw_df.where(extracted_rule)
-
-print("Final Curated Data:")
-clean_df.show()
-
+print("Final Gold Summary Data:")
+gold_df.show()
