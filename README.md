@@ -1,17 +1,18 @@
+from pyspark.sql.functions import col, upper
 
-# 1. Read Raw JSON (with the multiline fix!)
-df_json_raw = spark.read.format("json") \
-    .option("multiline", "true") \
-    .load("/Volumes/workspace/default/raw_data_volume/big_box_home_improvement_dataset.json")
+# 1. Read from the Bronze tables we just created
+df_json_bronze = spark.read.table("bronze_json_data")
+df_csv_bronze = spark.read.table("bronze_csv_data")
 
-# 2. Read Raw CSV
-df_csv_raw = spark.read.format("csv") \
-    .option("header", "true") \
-    .option("inferSchema", "true") \
-    .load("/Volumes/workspace/default/raw_data_volume/big_box_home_improvement_dataset.csv")
+# 2. Clean JSON: Filter out null transactions
+df_json_silver = df_json_bronze.filter(col("transaction_id").isNotNull())
 
-# 3. Save as Bronze Delta Tables
-df_json_raw.write.format("delta").mode("overwrite").saveAsTable("bronze_json_data")
-df_csv_raw.write.format("delta").mode("overwrite").saveAsTable("bronze_csv_data")
+# 3. Clean CSV: Create uppercase column and filter nulls
+df_csv_silver = df_csv_bronze.withColumn("department_upper", upper(col("department"))) \
+                             .filter(col("transaction_id").isNotNull())
 
-print("Bronze ingestion complete!")
+# 4. Save as Silver Delta Tables
+df_json_silver.write.format("delta").mode("overwrite").saveAsTable("silver_json_data")
+df_csv_silver.write.format("delta").mode("overwrite").saveAsTable("silver_csv_data")
+
+print("Silver transformations complete!")
