@@ -1,49 +1,55 @@
 import json
-from pyspark.sql.functions import expr
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import sum, col
 
-# 1. THE SYNAPSE OBJECT (Simulating your SilverToGold.json file)
-synapse_gold_json = """
-{
-    "name": "SilverToGold",
-    "properties": {
+# 1. SIMULATING THE SYNAPSE METADATA (Using your REAL Week 2 rules!)
+synapse_metadata_repo = {
+    "BronzeToSilver_Pipeline": {
         "type": "MappingDataFlow",
-        "sources": [{"name": "silver_sales"}],
-        "transformations": [
-            {
-                "name": "AggregateRevenue",
-                "group_by_column": "department",
-                "aggregate_expression": "sum(sales_amount) as total_revenue"
-            }
-        ]
+        "operation": "filter",
+        "rule": "transaction_id IS NOT NULL" # Your actual cleaning rule
+    },
+    "SilverToGold_Pipeline": {
+        "type": "MappingDataFlow",
+        "operation": "aggregate",
+        "group_by": "department",             # Your actual grouping column
+        "agg_metric": "total_after_discount", # Your actual math column
+        "agg_function": "sum"
     }
 }
-"""
 
-# 2. THE PARSER 
-print("--- 1. READING SYNAPSE GOLD OBJECT ---")
-gold_obj = json.loads(synapse_gold_json)
+print("--- STEP 1: READING SYNAPSE OBJECTS DYNAMICALLY ---")
+b2s_meta = synapse_metadata_repo["BronzeToSilver_Pipeline"]
+s2g_meta = synapse_metadata_repo["SilverToGold_Pipeline"]
 
-gold_pipeline_name = gold_obj["name"]
-group_col = gold_obj["properties"]["transformations"][0]["group_by_column"]
-agg_expr = gold_obj["properties"]["transformations"][0]["aggregate_expression"]
+print(f"Loaded BronzeToSilver Rule: '{b2s_meta['rule']}'")
+print(f"Loaded SilverToGold Rule: Group By '{s2g_meta['group_by']}', Summing '{s2g_meta['agg_metric']}'\n")
 
-print(f"Successfully read Pipeline: {gold_pipeline_name}")
-print(f"Found Group By Rule: '{group_col}'")
-print(f"Found Aggregation Rule: '{agg_expr}'\n")
 
-# 3. THE EXECUTION 
-print("--- 2. EXECUTING MIGRATED GOLD LOGIC ---")
+# 2. INGESTING YOUR ACTUAL WEEK 2 DATA
+print("--- STEP 2: READING REAL WEEK 2 DATA ---")
+# Reading directly from your Volume just like we did in the original script
+raw_df = spark.read.format("csv") \
+    .option("header", "true") \
+    .option("inferSchema", "true") \
+    .load("/Volumes/workspace/default/raw_data_volume/big_box_home_improvement_dataset.csv")
 
-# Fake Silver Data
-silver_data = [("Hardware", 50.0), ("Hardware", 100.0), ("Garden", 20.0)]
-silver_df = spark.createDataFrame(silver_data, ["department", "sales_amount"])
+print("Raw Bronze Data (First 5 rows):")
+raw_df.show(5)
 
-print("Clean Silver Data:")
-silver_df.show()
 
-# Automatically apply the extracted grouping and aggregation rules!
-print("Applying extracted Synapse aggregation automatically...")
-gold_df = silver_df.groupBy(group_col).agg(expr(agg_expr))
+# 3. EXECUTING THE METADATA FACTORY
+print("--- STEP 3: EXECUTING MIGRATED LOGIC ---")
 
-print("Final Gold Summary Data:")
-gold_df.show()
+# Executing Bronze -> Silver translation
+print("Executing Silver Layer (Applying Filter extracted from Synapse):")
+# Notice how we pass the rule string dynamically!
+silver_df = raw_df.where(b2s_meta["rule"])
+silver_df.show(5)
+
+# Executing Silver -> Gold translation
+print("Executing Gold Layer (Applying Aggregation extracted from Synapse):")
+if s2g_meta["agg_function"] == "sum":
+    gold_df = silver_df.groupBy(s2g_meta["group_by"]) \
+                       .agg(sum(s2g_meta["agg_metric"]).alias("total_department_revenue"))
+    gold_df.show(5)
