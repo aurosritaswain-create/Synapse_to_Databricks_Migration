@@ -1,0 +1,16 @@
+Assuming Claude Code and AI agents are available throughout the migration, the architecture shifts from a manual "read-and-rewrite" model to an automated "extract-and-translate" pipeline. In this architecture, Claude Code serves as the core processing engine, while human engineers act as orchestrators and reviewers.
+Step 1: Discovery & Extraction (The Input Layer)
+ Action: Export legacy Azure Synapse pipelines and Data Flows as raw JSON metadata files.
+ Process: A lightweight Python script scans the repository, identifies pipeline dependencies, and batches the JSON files based on their layer (e.g., Bronze-to-Silver data cleaning vs. Silver-to-Gold aggregations).
+Step 2: The Agentic Translation Engine (Claude Code Integration)
+ Action: The AI agent translates the legacy logic into optimized Databricks code.
+ Prompt Engineering: The JSON payloads are wrapped in strict system instructions before being passed to Claude Code.
+ Example System Rule: "You are an enterprise data engineer. Translate this Synapse JSON into PySpark. Use the DataFrame API exclusively. Do not use Spark SQL. Implement standard error handling."
+ Execution: Claude Code reads the mapping logic (e.g., filter rules, joins, window functions) and instantly generates the equivalent PySpark script.
+Step 3: Output Generation & Standardization (The Output Layer)
+ Action: The AI formats the generated code into deployable Databricks assets.
+ Process: The raw PySpark code is automatically structured into modular Databricks Notebooks or Python files. Claude Code also generates the corresponding Databricks Workflow JSON to replicate the original Synapse scheduling and triggers.
+Step 4: Human-in-the-Loop Validation (Quality Assurance)
+ Action: Human engineers review the generated assets and validate data accuracy.
+ Process: The generated Databricks code is executed against a sample dataset. Engineers use programmatic parity checks (such as PySpark's ⁠exceptAll()⁠ function) to mathematically prove the AI-generated pipeline produces the exact same output as the legacy Synapse pipeline.
+ Deployment: Once parity is confirmed, the code is pushed to the main branch for CI/CD deployment.
