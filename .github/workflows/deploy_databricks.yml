@@ -22,8 +22,8 @@ jobs:
 
       - name: Validate Databricks Bundle Syntax
         env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_HOST: ${{ secrets.Databricks_Host }}
+          DATABRICKS_TOKEN: ${{ secrets.Databricks_Token }}
         run: |
           echo "Running syntax and bundle validation..."
           databricks bundle validate -t development
