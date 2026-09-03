@@ -20,17 +20,17 @@ resources:
       tasks:
         - task_key: "run_bronze_layer"
           notebook_task:
-            notebook_path: "/Week2/(option2)01_Bronze.ipynb"
+            notebook_path: "Week2/(option2)01_Bronze.ipynb"
             
         - task_key: "run_silver_layer"
           depends_on:
             - task_key: "run_bronze_layer"
           notebook_task:
-            notebook_path: "/Week2/(option2)02_Silver.ipynb"
+            notebook_path: "Week2/(option2)02_Silver.ipynb"
             
         - task_key: "run_gold_layer"
           depends_on:
             - task_key: "run_silver_layer"
           notebook_task:
-            notebook_path: "/Week2/(option2)03_Gold.ipynb"
+            notebook_path: "Week2/(option2)03_Gold.ipynb"
 
