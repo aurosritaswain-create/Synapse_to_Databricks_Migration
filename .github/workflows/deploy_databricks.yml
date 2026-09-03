@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Databricks CLI
-        run: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/setup.sh | sh
+        uses: databricks/setup-cli@main
 
       - name: Validate Databricks Bundle Syntax
         env:
@@ -27,7 +27,7 @@ jobs:
         run: |
           echo "Running syntax and bundle validation..."
           databricks bundle validate -t development
-          echo "✅ Validation Passed!"
+          echo "Validation Passed!"
 
   deploy:
     name: Deploy to Production
@@ -39,13 +39,13 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Install Databricks CLI
-        run: curl -fsSL https://raw.githubusercontent.com/databricks/setup-cli/main/setup.sh | sh
+        uses: databricks/setup-cli@main
 
       - name: Deploy Databricks Asset Bundle to Prod
         env:
-          DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
-          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_HOST: ${{ secrets.Databricks_Host }}
+          DATABRICKS_TOKEN: ${{ secrets.Databricks_Token }}
         run: |
           echo "Deploying Databricks workflows to Production..."
           databricks bundle deploy -t production
-          echo "✅ Deployment Successful!"
+          echo "Deployment Successful!"
