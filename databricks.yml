@@ -2,9 +2,6 @@
 bundle:
   name: synapse_migration_project
 
-workspace:
-  host: ${workspace.host}
-
 targets:
   development:
     mode: development
