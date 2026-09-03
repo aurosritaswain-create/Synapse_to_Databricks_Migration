@@ -1,1 +1,26 @@
 
+bundle:
+  name: synapse_migration_project
+
+workspace:
+  host: ${workspace.host}
+
+targets:
+  development:
+    mode: development
+    default: true
+    workspace:
+      root_path: /Users/${workspace.current_user.userName}/.bundle/${bundle.name}/dev
+  production:
+    mode: production
+    workspace:
+      root_path: /Shared/production_pipelines/${bundle.name}
+
+resources:
+  jobs:
+    migrated_synapse_pipeline:
+      name: "Production_Synapse_Migration_Job"
+      tasks:
+        - task_key: "run_bronze_layer"
+          notebook_task:
+            notebook_path: "/Week2/(option2)01_Bronze.ipynb"
